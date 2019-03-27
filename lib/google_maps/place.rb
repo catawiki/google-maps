@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require File.expand_path('api', __dir__)
+require File.expand_path('address_components_proxy', __dir__)
 
 module Google
   module Maps
@@ -65,26 +66,6 @@ module Google
       def self.find(place_id, language = :en)
         args = { language: language, placeid: place_id }
         PlaceDetails.new(API.query(:place_details_service, args).result)
-      end
-
-      class AddressComponentsProxy
-        def initialize(address_components)
-          @address_components = address_components
-        end
-
-        def method_missing(method_name, *args)
-          raise ArgumentError unless args.empty?
-
-          @address_components.find do |component|
-            component.types.first == method_name.to_s
-          end || super
-        end
-
-        def respond_to_missing?(method_name, include_private = false)
-          @address_components.any? do |component|
-            component.types.first == method_name.to_s
-          end || super
-        end
       end
     end
   end
